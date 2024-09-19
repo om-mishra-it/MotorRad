@@ -1,6 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from .models import User, UserPreference, UserConnection, UserAchievement
 from .serializers import UserSerializer, UserPreferenceSerializer, UserConnectionSerializer, UserAchievementSerializer
 
@@ -9,6 +10,11 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['username', 'email', 'first_name', 'last_name']
+
+    @action(detail=False, methods=['get'])
+    def token(self, request):
+        token, created = Token.objects.get_or_create(user=request.user)
+        return Response({'token': token.key})
 
     @action(detail=True, methods=['post'])
     def set_profile_picture(self, request, pk=None):
